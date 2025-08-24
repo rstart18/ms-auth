@@ -1,0 +1,21 @@
+version: "3.9"
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: ms-auth-postgres
+    environment:
+      POSTGRES_USER: ms_auth
+      POSTGRES_PASSWORD: ms_auth
+      POSTGRES_DB: ms_auth
+    ports:
+      - "5432:5432"            # cambia el de la izquierda si ya tienes otro Postgres local
+    volumes:
+      - ./postgres/data:/var/lib/postgresql/data         # persistencia
+      - ./postgres/init:/docker-entrypoint-initdb.d:ro   # scripts .sql/.sh de init
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ms_auth -d ms_auth"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+    restart: unless-stopped
