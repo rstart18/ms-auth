@@ -1,4 +1,4 @@
-package co.com.bancolombia.r2dbc.mapper.dto;
+package co.com.bancolombia.r2dbc.mapper.entity;
 
 import co.com.bancolombia.model.user.User;
 import co.com.bancolombia.r2dbc.config.MapStructSpringConfig;
@@ -9,32 +9,20 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
 import org.mapstruct.Mappings;
-import org.mapstruct.Named;
+
 
 @Mapper(config = MapStructSpringConfig.class)
 public interface UserEntityMapper {
 
-    // ------- Entity -> Domain -------
-    @Mappings({
-        @Mapping(target = "roleId", source = "role.id")
-    })
+    // Entity -> Domain
     User toDomain(UserEntity entity);
 
-    // ------- Domain -> Entity -------
+    // Domain -> Entity
     @Mappings({
-        @Mapping(target = "role", source = "roleId", qualifiedByName = "toRoleEntity"),
         @Mapping(target = "id", ignore = true)
     })
     UserEntity toEntity(User domain);
 
-    // ------- Updates (PATCH/PUT) opcional -------
     @InheritConfiguration(name = "toEntity")
     void updateEntityFromDomain(User domain, @MappingTarget UserEntity target);
-
-    // ------- Helpers -------
-    @Named("toRoleEntity")
-    default RoleEntity toRoleEntity(Long roleId) {
-        if (roleId == null) return null;
-        return RoleEntity.builder().id(roleId).build();
-    }
 }

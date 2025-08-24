@@ -1,4 +1,4 @@
-package co.com.bancolombia.api.config;
+package co.com.bancolombia.r2dbc.config;
 
 import org.mapstruct.InjectionStrategy;
 import org.mapstruct.MapperConfig;

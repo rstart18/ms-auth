@@ -12,6 +12,17 @@ buildCache {
     }
 }
 
+dependencyResolutionManagement {
+    versionCatalogs {
+        libs {
+            version('mapstruct', '1.5.5.Final')
+            library('mapstructCore', 'org.mapstruct', 'mapstruct').versionRef('mapstruct')
+            library('mapstructLombok', 'org.projectlombok:lombok-mapstruct-binding:0.2.0')
+            library('mapstructProcessor', 'org.mapstruct', 'mapstruct-processor').versionRef('mapstruct')
+        }
+    }
+}
+
 rootProject.name = 'ms-auth'
 
 include ':app-service'
@@ -22,3 +33,5 @@ project(':model').projectDir = file('./domain/model')
 project(':usecase').projectDir = file('./domain/usecase')
 include ':reactive-web'
 project(':reactive-web').projectDir = file('./infrastructure/entry-points/reactive-web')
+include ':r2dbc-postgresql'
+project(':r2dbc-postgresql').projectDir = file('./infrastructure/driven-adapters/r2dbc-postgresql')
