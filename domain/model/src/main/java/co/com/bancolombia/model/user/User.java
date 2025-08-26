@@ -5,6 +5,8 @@ import lombok.Getter;
 //import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.time.LocalDate;
+
 @Getter
 @Setter
 @AllArgsConstructor
@@ -18,5 +20,7 @@ public class User {
     private String phone;
     private Long roleId;
     private Integer baseSalary;
+    LocalDate birthday;
+    String address;
 }
 

@@ -8,10 +8,8 @@ import org.mapstruct.Mapping;
 
 @Mapper(componentModel = "spring")
 public interface UserDtoMapper {
+
     @Mapping(target = "id", ignore = true)
-    @Mapping(target = "identityDocument", ignore = true)
-    @Mapping(target = "phone", ignore = true)
-    @Mapping(target = "roleId", ignore = true) // si no viene en el request
     User toDomain(UserRequest request);
 
     UserResponse toResponse(User domain);

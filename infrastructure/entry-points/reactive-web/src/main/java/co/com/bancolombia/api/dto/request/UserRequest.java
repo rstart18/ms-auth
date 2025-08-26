@@ -1,8 +1,9 @@
 package co.com.bancolombia.api.dto.request;
 
 import jakarta.validation.constraints.*;
-
 import lombok.Data;
+
+import java.time.LocalDate;
 
 @Data
 public class UserRequest {
@@ -31,4 +32,12 @@ public class UserRequest {
     @Min(value = 0, message = "El salario base no puede ser menor a 0")
     @Max(value = 1_500_000, message = "El salario base no puede ser mayor a 1,500,000")
     private Integer baseSalary;
+
+    @NotNull(message = "La fecha de nacimiento es obligatoria")
+    @Past(message = "La fecha de nacimiento debe estar en el pasado")
+    private LocalDate birthday;
+
+    @NotBlank(message = "La dirección es obligatoria")
+    @Size(max = 255, message = "La dirección no puede superar los 255 caracteres")
+    private String address;
 }

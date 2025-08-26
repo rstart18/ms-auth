@@ -17,8 +17,6 @@ public class CreateUserUseCase {
             .flatMap(user -> userRepository.existsByEmail(user.getEmail())
                 .flatMap(exists -> exists
                     ? Mono.error(BusinessException.conflict("email", "ya se encuentra registrado"))
-                    : userRepository.save(user)))
-            .onErrorMap(ex -> (ex instanceof BusinessException) ? ex
-                : BusinessException.internal("Fallo al crear usuario"));
+                    : userRepository.save(user)));
     }
 }

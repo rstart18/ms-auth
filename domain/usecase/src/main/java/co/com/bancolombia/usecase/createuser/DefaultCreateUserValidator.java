@@ -4,7 +4,6 @@ import co.com.bancolombia.model.commons.BusinessException;
 import co.com.bancolombia.model.user.User;
 import reactor.core.publisher.Mono;
 
-import java.util.Objects;
 import java.util.regex.Pattern;
 
 public class DefaultCreateUserValidator implements CreateUserValidator {
@@ -19,22 +18,18 @@ public class DefaultCreateUserValidator implements CreateUserValidator {
         return Mono.justOrEmpty(input)
             .switchIfEmpty(Mono.error(
                 BusinessException.invalidField("user", "no puede ser null")))
-            .map(this::normalize)
+            .map(this::normalize)       // <- no destruye (no convierte a null)
             .flatMap(this::validateRules);
     }
 
-    // -------- Helpers internos --------
-
     private User normalize(User u) {
-        String name = trimToNull(u.getName());
-        String lastname = trimToNull(u.getLastname());
-        String email = trimToNull(u.getEmail());
-        if (email != null) email = email.toLowerCase();
-
         return u.toBuilder()
-            .name(name)
-            .lastname(lastname)
-            .email(email)
+            .name(trim(u.getName()))
+            .lastname(trim(u.getLastname()))
+            .email(lower(trim(u.getEmail())))
+            .identityDocument(trim(u.getIdentityDocument()))
+            .phone(onlyDigits(trim(u.getPhone())))
+            .address(trim(u.getAddress()))
             .build();
     }
 
@@ -47,18 +42,27 @@ public class DefaultCreateUserValidator implements CreateUserValidator {
             return Mono.error(BusinessException.invalidField("email", "obligatorio"));
         if (!EMAIL_RX.matcher(u.getEmail()).matches())
             return Mono.error(BusinessException.invalidField("email", "formato inválido"));
-        if (Objects.isNull(u.getBaseSalary()))
+
+        if (isBlank(u.getIdentityDocument()))
+            return Mono.error(BusinessException.invalidField("identityDocument", "obligatorio"));
+        if (isBlank(u.getPhone()))
+            return Mono.error(BusinessException.invalidField("phone", "obligatorio"));
+
+        if (u.getRoleId() == null)
+            return Mono.error(BusinessException.invalidField("roleId", "obligatorio"));
+
+        if (u.getBaseSalary() == null)
             return Mono.error(BusinessException.invalidField("baseSalary", "obligatorio"));
         if (u.getBaseSalary() < MIN_SALARY || u.getBaseSalary() > MAX_SALARY)
             return Mono.error(BusinessException.invalidField(
                 "baseSalary", "fuera de rango [" + MIN_SALARY + ".." + MAX_SALARY + "]"));
+
         return Mono.just(u);
     }
 
+    // ---------- Helpers ----------
+    private static String trim(String s) { return s == null ? null : s.trim(); }
+    private static String lower(String s) { return s == null ? null : s.toLowerCase(); }
+    private static String onlyDigits(String s) { return s == null ? null : s.replaceAll("\\D+", ""); }
     private static boolean isBlank(String s) { return s == null || s.trim().isEmpty(); }
-    private static String trimToNull(String s) {
-        if (s == null) return null;
-        String t = s.trim();
-        return t.isEmpty() ? null : t;
-    }
 }
