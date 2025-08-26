@@ -19,6 +19,7 @@ dependencyResolutionManagement {
             library('mapstructCore', 'org.mapstruct', 'mapstruct').versionRef('mapstruct')
             library('mapstructLombok', 'org.projectlombok:lombok-mapstruct-binding:0.2.0')
             library('mapstructProcessor', 'org.mapstruct', 'mapstruct-processor').versionRef('mapstruct')
+            library('springBootValidation', 'org.springframework.boot', 'spring-boot-starter-validation').withoutVersion()
         }
     }
 }

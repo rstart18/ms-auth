@@ -1,7 +1,5 @@
 package co.com.bancolombia.api.error;
 
-package co.com.tuapp.api.error;
-
 import co.com.bancolombia.model.commons.BusinessException;
 import com.fasterxml.jackson.databind.exc.MismatchedInputException;
 import org.springframework.core.codec.DecodingException;
@@ -18,7 +16,6 @@ public final class ErrorMapper {
     private ErrorMapper() {}
 
     public static MappedError map(Throwable ex) {
-        // 1) Negocio propio
         if (ex instanceof BusinessException be) {
             var status = "CONFLICT".equals(be.getCode()) ? HttpStatus.CONFLICT : HttpStatus.BAD_REQUEST;
             return new MappedError(status, Map.of(
@@ -28,7 +25,6 @@ public final class ErrorMapper {
             ));
         }
 
-        // 2) Not found típico en casos de uso
         if (ex instanceof NoSuchElementException) {
             return new MappedError(HttpStatus.NOT_FOUND, Map.of(
                 "field", "resource",
@@ -37,7 +33,6 @@ public final class ErrorMapper {
             ));
         }
 
-        // 3) Validación (functional routing) -> @Valid y binding
         if (ex instanceof WebExchangeBindException bind) {
             var first = bind.getFieldErrors().stream().findFirst();
             return new MappedError(HttpStatus.BAD_REQUEST, Map.of(
@@ -47,7 +42,6 @@ public final class ErrorMapper {
             ));
         }
 
-        // 4) Entrada inválida / decoding (JSON mal formado, tipos)
         if (ex instanceof ServerWebInputException
             || ex instanceof DecodingException
             || ex.getCause() instanceof MismatchedInputException) {
@@ -58,7 +52,6 @@ public final class ErrorMapper {
             ));
         }
 
-        // 5) Errores con status explícito
         if (ex instanceof ResponseStatusException rse) {
             var status = HttpStatus.resolve(rse.getStatusCode().value());
             return new MappedError(status != null ? status : HttpStatus.INTERNAL_SERVER_ERROR, Map.of(
@@ -68,7 +61,6 @@ public final class ErrorMapper {
             ));
         }
 
-        // 6) Genérico
         return new MappedError(HttpStatus.INTERNAL_SERVER_ERROR, Map.of(
             "field", "internal",
             "message", "Error inesperado",

@@ -7,6 +7,7 @@ import co.com.bancolombia.r2dbc.helper.ReactiveAdapterOperations;
 import co.com.bancolombia.r2dbc.mapper.entity.UserEntityMapper;
 import co.com.bancolombia.r2dbc.repository.UserReactiveRepository;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.reactive.TransactionalOperator;
 import reactor.core.publisher.Mono;
 
 @Repository
@@ -16,13 +17,16 @@ public class UserReactiveRepositoryAdapter
 
     private final UserReactiveRepository repository;
     private final UserEntityMapper entityMapper;
+    private final TransactionalOperator tx;
 
     public UserReactiveRepositoryAdapter(UserReactiveRepository repository,
                                          org.reactivecommons.utils.ObjectMapper mapper,
-                                         UserEntityMapper entityMapper) {
+                                         UserEntityMapper entityMapper,
+                                         TransactionalOperator tx) {
         super(repository, mapper, entityMapper::toDomain);
         this.repository = repository;
         this.entityMapper = entityMapper;
+        this.tx = tx;
     }
 
     @Override

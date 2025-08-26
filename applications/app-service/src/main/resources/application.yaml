@@ -37,3 +37,8 @@ logging:
     org.springframework.data.r2dbc: DEBUG
     org.springframework.r2dbc.core: DEBUG
 
+routes:
+  paths:
+    user:
+      create-user: /api/v1/usuarios
+

@@ -14,7 +14,6 @@ public class R2dbcTxConfig {
 
     @Bean
     public ReactiveTransactionManager reactiveTransactionManager(ConnectionFactory connectionFactory) {
-        // Usa el ConnectionFactory que ya expones en PostgreSQLConnectionPool
         return new R2dbcTransactionManager(connectionFactory);
     }
 
