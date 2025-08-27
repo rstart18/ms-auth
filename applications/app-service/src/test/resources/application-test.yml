@@ -1,0 +1,46 @@
+spring:
+  r2dbc:
+    url: r2dbc:h2:mem:///testdb;DB_CLOSE_DELAY=-1
+    username: sa
+    password: ""
+
+  application:
+    name: ms-auth-test
+
+  main:
+    lazy-initialization: false
+
+  autoconfigure:
+    exclude:
+      - org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration
+
+# API Configuration
+api:
+  base-path:
+
+# Server configuration
+server:
+  port: 0  # Random port for tests
+
+# Logging
+logging:
+  level:
+    org.springframework.r2dbc: DEBUG
+    io.r2dbc.h2: DEBUG
+    co.com.bancolombia: DEBUG
+    org.springframework.web.reactive: DEBUG
+
+# CORS (si es necesario)
+cors:
+  allowed-origins: "*"
+  allowed-methods: "GET,POST,PUT,DELETE,OPTIONS"
+  allowed-headers: "*"
+
+# JWT/Security (si usas autenticación)
+# jwt:
+#   secret: test-secret-key-for-testing-purposes-only
+#   expiration: 3600000
+routes:
+  paths:
+    user:
+      create-user: /api/v1/usuarios

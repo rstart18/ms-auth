@@ -6,9 +6,18 @@ dependencies {
     implementation 'org.postgresql:r2dbc-postgresql'
     implementation 'org.reactivecommons.utils:object-mapper-api:0.1.0'
     implementation libs.mapstructCore
+    implementation(platform(libs.springBootBom))
     annotationProcessor libs.mapstructProcessor
     annotationProcessor libs.mapstructLombok
 
+    testImplementation(libs.mockitoCore)
+    testImplementation(libs.mockitoJunitJupiter)
+    testImplementation(libs.reactorTest)
+    testImplementation(libs.assertj)
+
+    testImplementation libs.springBootStarterTest
+    testImplementation libs.r2dbcH2
     testImplementation 'org.reactivecommons.utils:object-mapper:0.1.0'
+//    testRuntimeOnly libs.h2Database
 }
 

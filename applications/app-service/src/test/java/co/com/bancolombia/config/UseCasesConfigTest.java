@@ -1,13 +1,20 @@
 package co.com.bancolombia.config;
 
+import co.com.bancolombia.model.user.gateways.UserRepository;
+import co.com.bancolombia.usecase.createuser.CreateUserUseCase;
+import co.com.bancolombia.usecase.createuser.CreateUserValidator;
 import org.junit.jupiter.api.Test;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
+import org.springframework.test.context.ActiveProfiles;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class UseCasesConfigTest {
+@SpringBootTest(classes = {UseCasesConfig.class, UseCasesConfigTest.TestConfig.class})
+@ActiveProfiles("test")
+class UseCasesConfigTest {
 
     @Test
     void testUseCaseBeansExist() {
@@ -31,14 +38,18 @@ public class UseCasesConfigTest {
     static class TestConfig {
 
         @Bean
-        public MyUseCase myUseCase() {
-            return new MyUseCase();
+        public UserRepository userRepository() {
+            return org.mockito.Mockito.mock(UserRepository.class);
         }
-    }
 
-    static class MyUseCase {
-        public String execute() {
-            return "MyUseCase Test";
+        @Bean
+        public CreateUserValidator createUserValidator() {
+            return org.mockito.Mockito.mock(CreateUserValidator.class);
+        }
+
+        @Bean
+        public CreateUserUseCase createUserUseCase(UserRepository userRepository, CreateUserValidator createUserValidator) {
+            return new CreateUserUseCase(userRepository, createUserValidator);
         }
     }
 }

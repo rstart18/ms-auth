@@ -15,13 +15,40 @@ buildCache {
 dependencyResolutionManagement {
     versionCatalogs {
         libs {
+            // Spring Boot
+            version('springBoot', '3.3.2')
+            library('springBootBom', 'org.springframework.boot', 'spring-boot-dependencies').versionRef('springBoot')
+
+            // Spring Doc
             version('springdoc', '2.6.0')
             library('springdocWebfluxUi', 'org.springdoc', 'springdoc-openapi-starter-webflux-ui').versionRef('springdoc')
+
+            // MapStruct
             version('mapstruct', '1.5.5.Final')
             library('mapstructCore', 'org.mapstruct', 'mapstruct').versionRef('mapstruct')
             library('mapstructLombok', 'org.projectlombok:lombok-mapstruct-binding:0.2.0')
             library('mapstructProcessor', 'org.mapstruct', 'mapstruct-processor').versionRef('mapstruct')
+
+            // Validation
             library('springBootValidation', 'org.springframework.boot', 'spring-boot-starter-validation').withoutVersion()
+
+            // Testing - Core dependencies
+            library('springBootStarterTest', 'org.springframework.boot', 'spring-boot-starter-test').withoutVersion()
+            library('mockitoCore', 'org.mockito', 'mockito-core').withoutVersion()
+            library('mockitoJunitJupiter', 'org.mockito', 'mockito-junit-jupiter').withoutVersion()
+            library('reactorTest', 'io.projectreactor', 'reactor-test').withoutVersion()
+            library('assertj', 'org.assertj', 'assertj-core').withoutVersion()
+
+            // Testing - Additional dependencies for integration tests
+            library('springBootDataR2dbc', 'org.springframework.boot', 'spring-boot-starter-data-r2dbc').withoutVersion()
+            library('r2dbcH2', 'io.r2dbc', 'r2dbc-h2').withoutVersion()
+            library('springBootWebflux', 'org.springframework.boot', 'spring-boot-starter-webflux').withoutVersion()
+
+            // Testing - TestContainers (opcional, para tests de integración con BD real)
+            version('testcontainers', '1.19.3')
+            library('testcontainersJupiter', 'org.testcontainers', 'junit-jupiter').versionRef('testcontainers')
+            library('testcontainersPostgresql', 'org.testcontainers', 'postgresql').versionRef('testcontainers')
+            library('testcontainersR2dbc', 'org.testcontainers', 'r2dbc').versionRef('testcontainers')
         }
     }
 }

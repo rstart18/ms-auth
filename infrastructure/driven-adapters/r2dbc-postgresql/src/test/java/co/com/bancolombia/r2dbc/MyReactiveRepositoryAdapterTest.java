@@ -1,80 +1,98 @@
 package co.com.bancolombia.r2dbc;
 
+import co.com.bancolombia.model.user.User;
 import co.com.bancolombia.r2dbc.adapter.UserReactiveRepositoryAdapter;
+import co.com.bancolombia.r2dbc.entity.UserEntity;
+import co.com.bancolombia.r2dbc.mapper.entity.UserEntityMapper;
 import co.com.bancolombia.r2dbc.repository.UserReactiveRepository;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.reactivecommons.utils.ObjectMapper;
-import org.springframework.data.domain.Example;
+import org.springframework.transaction.reactive.TransactionalOperator;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-class MyReactiveRepositoryAdapterTest {
-    // TODO: change four you own tests
-
-    @InjectMocks
-    UserReactiveRepositoryAdapter repositoryAdapter;
+class UserReactiveRepositoryAdapterTest {
 
     @Mock
-    UserReactiveRepository repository;
+    private UserReactiveRepository repository;
 
     @Mock
-    ObjectMapper mapper;
+    private UserEntityMapper entityMapper;
 
-    @Test
-    void mustFindValueById() {
+    @Mock
+    private ObjectMapper mapper;
 
-        when(repository.findById("1")).thenReturn(Mono.just("test"));
-        when(mapper.map("test", Object.class)).thenReturn("test");
+    @Mock
+    private TransactionalOperator tx;
 
-        Mono<Object> result = repositoryAdapter.findById("1");
+    private UserReactiveRepositoryAdapter adapter;
 
-        StepVerifier.create(result)
-                .expectNextMatches(value -> value.equals("test"))
-                .verifyComplete();
+    @BeforeEach
+    void setUp() {
+        lenient()
+            .when(tx.transactional(any(Mono.class)))
+            .thenAnswer(invocation -> invocation.getArgument(0));
+
+        lenient()
+            .when(tx.transactional(any(Flux.class)))
+            .thenAnswer(invocation -> invocation.getArgument(0));
+
+        adapter = new UserReactiveRepositoryAdapter(repository, mapper, entityMapper, tx);
     }
 
     @Test
-    void mustFindAllValues() {
-        when(repository.findAll()).thenReturn(Flux.just("test"));
-        when(mapper.map("test", Object.class)).thenReturn("test");
+    void save_successfully_maps_and_persists_user() {
+        // Given
+        User inputUser = User.builder()
+            .name("Juan")
+            .lastname("Pérez")
+            .email("juan@example.com")
+            .baseSalary(1_000_000)
+            .roleId(1L)
+            .build();
 
-        Flux<Object> result = repositoryAdapter.findAll();
+        UserEntity entityToPersist = UserEntity.builder()
+            .name("Juan")
+            .lastname("Pérez")
+            .email("juan@example.com")
+            .baseSalary(1_000_000)
+            .roleId(1L)
+            .build();
 
-        StepVerifier.create(result)
-                .expectNextMatches(value -> value.equals("test"))
-                .verifyComplete();
-    }
+        UserEntity persistedEntity = UserEntity.builder()
+            .id(10L)
+            .name("Juan")
+            .lastname("Pérez")
+            .email("juan@example.com")
+            .baseSalary(1_000_000)
+            .roleId(1L)
+            .build();
 
-    @Test
-    void mustFindByExample() {
-        when(repository.findAll(any(Example.class))).thenReturn(Flux.just("test"));
-        when(mapper.map("test", Object.class)).thenReturn("test");
+        User expectedUser = inputUser.toBuilder().id(10L).build();
 
-        Flux<Object> result = repositoryAdapter.findByExample("test");
+        // When
+        when(entityMapper.toEntity(inputUser)).thenReturn(entityToPersist);
+        when(repository.save(entityToPersist)).thenReturn(Mono.just(persistedEntity));
+        when(entityMapper.toDomain(persistedEntity)).thenReturn(expectedUser);
 
-        StepVerifier.create(result)
-                .expectNextMatches(value -> value.equals("test"))
-                .verifyComplete();
-    }
+        // Then
+        StepVerifier.create(adapter.save(inputUser))
+            .expectNext(expectedUser)
+            .verifyComplete();
 
-    @Test
-    void mustSaveValue() {
-        when(repository.save("test")).thenReturn(Mono.just("test"));
-        when(mapper.map("test", Object.class)).thenReturn("test");
-
-        Mono<Object> result = repositoryAdapter.save("test");
-
-        StepVerifier.create(result)
-                .expectNextMatches(value -> value.equals("test"))
-                .verifyComplete();
+        // Verify
+        verify(entityMapper).toEntity(inputUser);
+        verify(repository).save(entityToPersist);
+        verify(entityMapper).toDomain(persistedEntity);
+//        verify(tx).transactional(any(Mono.class));
     }
 }
