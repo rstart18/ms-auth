@@ -93,6 +93,6 @@ class UserReactiveRepositoryAdapterTest {
         verify(entityMapper).toEntity(inputUser);
         verify(repository).save(entityToPersist);
         verify(entityMapper).toDomain(persistedEntity);
-//        verify(tx).transactional(any(Mono.class));
+        verify(tx).transactional(any(Mono.class));
     }
 }

@@ -38,5 +38,14 @@ public class UserReactiveRepositoryAdapter
     public Mono<Boolean> existsByEmail(String email) {
         return repository.existsByEmail(email);
     }
+
+    @Override
+    public Mono<User> save(User user) {
+        UserEntity entity = toData(user);
+        return tx.transactional(
+            repository.save(entity)
+                .map(entityMapper::toDomain)
+        );
+    }
 }
 
