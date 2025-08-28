@@ -18,7 +18,7 @@ import static org.springframework.web.reactive.function.server.RouterFunctions.r
 public class RouterRest {
     @Bean
     public RouterFunction<ServerResponse> routerFunction(Handler handler, UserPath path) {
-        return route(POST("/api/v1/users"), handler::createUser)
+        return route(POST(path.getCreateUser()), handler::createUser)
             .filter(errorToJson());
     }
 
