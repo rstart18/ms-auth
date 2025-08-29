@@ -95,4 +95,73 @@ class UserReactiveRepositoryAdapterTest {
         verify(entityMapper).toDomain(persistedEntity);
         verify(tx).transactional(any(Mono.class));
     }
+
+    @Test
+    void save_should_emit_error_when_repository_fails() {
+        User inputUser = User.builder()
+            .name("Juan")
+            .lastname("Pérez")
+            .email("juan@example.com")
+            .baseSalary(1_000_000)
+            .roleId(1L)
+            .build();
+        UserEntity entityToPersist = UserEntity.builder()
+            .name("Juan")
+            .lastname("Pérez")
+            .email("juan@example.com")
+            .baseSalary(1_000_000)
+            .roleId(1L)
+            .build();
+        when(entityMapper.toEntity(inputUser)).thenReturn(entityToPersist);
+        when(repository.save(entityToPersist)).thenReturn(Mono.error(new RuntimeException("DB error")));
+        StepVerifier.create(adapter.save(inputUser))
+            .expectErrorMatches(e -> e instanceof RuntimeException && e.getMessage().equals("DB error"))
+            .verify();
+        verify(entityMapper).toEntity(inputUser);
+        verify(repository).save(entityToPersist);
+        verify(tx).transactional(any(Mono.class));
+    }
+
+    @Test
+    void existsByEmail_should_return_true_when_email_exists() {
+        String email = "test@correo.com";
+        when(repository.existsByEmail(email)).thenReturn(Mono.just(true));
+        StepVerifier.create(adapter.existsByEmail(email))
+            .expectNext(true)
+            .verifyComplete();
+        verify(repository).existsByEmail(email);
+    }
+
+    @Test
+    void existsByEmail_should_return_false_when_email_not_exists() {
+        String email = "noexiste@correo.com";
+        when(repository.existsByEmail(email)).thenReturn(Mono.just(false));
+        StepVerifier.create(adapter.existsByEmail(email))
+            .expectNext(false)
+            .verifyComplete();
+        verify(repository).existsByEmail(email);
+    }
+
+    @Test
+    void save_should_emit_error_when_user_is_null() {
+        StepVerifier.create(adapter.save(null))
+            .expectError(NullPointerException.class)
+            .verify();
+    }
+
+    @Test
+    void save_should_emit_error_when_mapper_fails() {
+        User inputUser = User.builder()
+            .name("Juan")
+            .lastname("Pérez")
+            .email("juan@example.com")
+            .baseSalary(1_000_000)
+            .roleId(1L)
+            .build();
+        when(entityMapper.toEntity(inputUser)).thenThrow(new IllegalArgumentException("Mapping error"));
+        StepVerifier.create(adapter.save(inputUser))
+            .expectErrorMatches(e -> e instanceof IllegalArgumentException && e.getMessage().equals("Mapping error"))
+            .verify();
+        verify(entityMapper).toEntity(inputUser);
+    }
 }
